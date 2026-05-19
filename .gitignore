@@ -1,0 +1,27 @@
+﻿# Compiled files
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Log files
+*.log
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+banking-app-key.pem
+
+# Test backup
+test_backup/
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar

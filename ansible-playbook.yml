@@ -1,0 +1,53 @@
+---
+- name: Manage Banking Application Container
+  hosts: localhost
+  connection: local
+  vars:
+    app_port: 8082
+    container_name: banking-container
+    image_name: banking-app:latest
+  
+  tasks:
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_check
+      ignore_errors: yes
+    
+    - name: Display Docker version
+      debug:
+        msg: "Docker is installed: {{ docker_check.stdout }}"
+    
+    - name: Check if container is running
+      docker_container:
+        name: "{{ container_name }}"
+        state: started
+        image: "{{ image_name }}"
+        ports:
+          - "{{ app_port }}:8081"
+        restart_policy: always
+      register: container_result
+    
+    - name: Wait for application to start
+      wait_for:
+        port: "{{ app_port }}"
+        delay: 3
+        timeout: 30
+    
+    - name: Test application health
+      uri:
+        url: "http://localhost:{{ app_port }}/viewPolicy/1001"
+        return_content: yes
+        status_code: 200
+      register: health_check
+    
+    - name: Display health check result
+      debug:
+        msg: "✅ Application is running! Response: {{ health_check.content | from_json }}"
+    
+    - name: Show container status
+      command: docker ps --filter "name={{ container_name }}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+      register: container_status
+    
+    - name: Display container status
+      debug:
+        msg: "{{ container_status.stdout_lines }}"
